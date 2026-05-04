@@ -1,0 +1,81 @@
+{% extends "screener/base.html" %}
+{% block title %}Smart Resume Screener — Analyze Your Resume{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center fade-in">
+  <div class="col-lg-8">
+
+    <!-- Hero -->
+    <div class="text-center mb-5">
+      <h1 class="fw-800 mb-3" style="font-size:2.4rem;">
+        Land Your <span style="background:linear-gradient(135deg,var(--accent),#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Dream Job</span>
+      </h1>
+      <p class="text-muted fs-5">Paste your resume & job description — our AI analyzes the match in seconds.</p>
+    </div>
+
+    <!-- Form Card -->
+    <div class="glass p-4 p-md-5 mb-5">
+      <form method="post" enctype="multipart/form-data" id="analysis-form">
+        {% csrf_token %}
+
+        <!-- Job Description -->
+        <div class="mb-4">
+          <label class="form-label" for="id_job_description">
+            <i class="bi bi-briefcase me-1"></i>Job Description
+          </label>
+          <textarea class="form-control" id="id_job_description" name="job_description"
+                    rows="6" placeholder="Paste the full job description here…" required></textarea>
+        </div>
+
+        <!-- Resume Text -->
+        <div class="mb-4">
+          <label class="form-label" for="id_resume_text">
+            <i class="bi bi-file-earmark-person me-1"></i>Resume Text
+            <small class="text-muted fw-normal">(or upload PDF below)</small>
+          </label>
+          <textarea class="form-control" id="id_resume_text" name="resume_text"
+                    rows="6" placeholder="Paste your resume text here…"></textarea>
+        </div>
+
+        <!-- PDF Upload -->
+        <div class="mb-4">
+          <label class="form-label" for="id_pdf_file">
+            <i class="bi bi-file-earmark-pdf me-1"></i>Upload PDF <small class="text-muted fw-normal">(optional, max 5 MB)</small>
+          </label>
+          <input type="file" class="form-control" id="id_pdf_file" name="pdf_file" accept=".pdf">
+        </div>
+
+        <!-- Submit -->
+        <div class="text-center">
+          <button type="submit" class="btn btn-accent btn-lg px-5" id="btn-analyze">
+            <i class="bi bi-rocket-takeoff me-2"></i>Analyze Match
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Recent Analyses -->
+    {% if recent_analyses %}
+    <div class="fade-in" style="animation-delay: 0.2s;">
+      <h5 class="fw-600 mb-3"><i class="bi bi-clock-history me-2 text-muted"></i>Recent Analyses</h5>
+      <div class="list-group">
+        {% for item in recent_analyses %}
+        <a href="{% url 'screener:results' pk=item.pk %}"
+           class="list-group-item list-group-item-action glass d-flex justify-content-between align-items-center mb-2"
+           style="border-radius:12px; border-color: var(--border-glass); color: var(--text-primary);">
+          <div>
+            <span class="fw-500">{{ item.jd_snippet }}</span>
+            {% if item.resume_filename %}
+            <small class="text-muted d-block mt-1"><i class="bi bi-paperclip me-1"></i>{{ item.resume_filename }}</small>
+            {% endif %}
+          </div>
+          <span class="badge rounded-pill bg-{{ item.score_color }} fs-6">{{ item.match_score }}%</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

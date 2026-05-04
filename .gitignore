@@ -1,0 +1,16 @@
+# Python
+
+**pycache**/
+*.pyc
+
+# Environment
+
+.env
+
+# Database
+
+db.sqlite3
+
+# Static files
+
+staticfiles/

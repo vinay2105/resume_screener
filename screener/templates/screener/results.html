@@ -1,0 +1,148 @@
+{% extends "screener/base.html" %}
+{% block title %}Results — {{ analysis.match_score }}% Match | Smart Resume Screener{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center fade-in">
+  <div class="col-lg-9">
+
+    <!-- ── Header ─────────────────────────────────────────── -->
+    <div class="text-center mb-5">
+      <h1 class="fw-700 mb-2">Analysis Results</h1>
+      {% if analysis.resume_filename %}
+      <p class="text-muted"><i class="bi bi-paperclip me-1"></i>{{ analysis.resume_filename }}</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Score Ring ──────────────────────────────────────── -->
+    <div class="glass p-5 mb-4 text-center">
+      <div class="score-ring mx-auto mb-3"
+           style="background: conic-gradient(
+             var(--{{ analysis.score_color }}-soft, var(--accent)) 0% {{ analysis.match_score }}%,
+             rgba(255,255,255,0.06) {{ analysis.match_score }}% 100%
+           );">
+        <div style="width:120px;height:120px;border-radius:50%;background:var(--bg-primary);display:flex;align-items:center;justify-content:center;font-size:2.5rem;font-weight:800;">
+          {{ analysis.match_score }}
+        </div>
+      </div>
+      <p class="text-muted mb-0">Overall Match Score</p>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <!-- ── Matched Skills ───────────────────────────────── -->
+      <div class="col-md-6">
+        <div class="glass p-4 h-100">
+          <h5 class="fw-600 mb-3"><i class="bi bi-check-circle text-success me-2"></i>Matched Skills</h5>
+          {% if analysis.matched_skills %}
+            {% for skill in analysis.matched_skills %}
+              <span class="skill-badge skill-matched">{{ skill }}</span>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted mb-0">No matched skills found.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── Missing Skills ───────────────────────────────── -->
+      <div class="col-md-6">
+        <div class="glass p-4 h-100">
+          <h5 class="fw-600 mb-3"><i class="bi bi-x-circle text-danger me-2"></i>Missing Skills</h5>
+          {% if analysis.missing_skills %}
+            {% for skill in analysis.missing_skills %}
+              <span class="skill-badge skill-missing">{{ skill }}</span>
+            {% endfor %}
+          {% else %}
+            <p class="text-muted mb-0">No missing skills — great match!</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Professional Summary ────────────────────────────── -->
+    {% if analysis.summary %}
+    <div class="glass p-4 mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-600 mb-0"><i class="bi bi-person-badge me-2 text-info"></i>Professional Summary</h5>
+        <button class="btn btn-sm btn-outline-light" onclick="copyText('summary-text')" title="Copy">
+          <i class="bi bi-clipboard me-1"></i>Copy
+        </button>
+      </div>
+      <p id="summary-text" class="mb-0" style="line-height:1.7;">{{ analysis.summary }}</p>
+    </div>
+    {% endif %}
+
+    <!-- ── Rewritten Bullets ──────────────────────────────── -->
+    {% if analysis.rewritten_bullets %}
+    <div class="glass p-4 mb-4">
+      <h5 class="fw-600 mb-3"><i class="bi bi-arrow-repeat me-2" style="color:var(--accent);"></i>Rewritten Bullet Points</h5>
+      {% for bullet in analysis.rewritten_bullets %}
+      <div class="row mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}" style="border-color: var(--border-glass) !important;">
+        <div class="col-md-6">
+          <small class="text-muted fw-600 text-uppercase">Before</small>
+          <p class="mb-0 mt-1" style="opacity:0.7;">{{ bullet.before }}</p>
+        </div>
+        <div class="col-md-6">
+          <small class="fw-600 text-uppercase" style="color: var(--success-soft);">After</small>
+          <p class="mb-0 mt-1">{{ bullet.after }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ── Improvement Suggestions ────────────────────────── -->
+    {% if analysis.improvements %}
+    <div class="glass p-4 mb-4">
+      <h5 class="fw-600 mb-3"><i class="bi bi-lightbulb me-2" style="color: var(--warning-soft);"></i>Improvement Suggestions</h5>
+      <ul class="list-unstyled mb-0">
+        {% for tip in analysis.improvements %}
+        <li class="mb-2 d-flex align-items-start">
+          <i class="bi bi-arrow-right-circle me-2 mt-1" style="color: var(--accent); min-width:16px;"></i>
+          <span>{{ tip }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    <!-- ── ATS Keywords ───────────────────────────────────── -->
+    {% if analysis.ats_keywords %}
+    <div class="glass p-4 mb-4">
+      <h5 class="fw-600 mb-3"><i class="bi bi-search me-2" style="color: var(--accent);"></i>ATS Keywords</h5>
+      {% for keyword in analysis.ats_keywords %}
+        <span class="skill-badge skill-ats">{{ keyword }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ── Actions ─────────────────────────────────────────── -->
+    <div class="text-center mt-5">
+      <a href="{% url 'screener:home' %}" class="btn btn-accent me-3">
+        <i class="bi bi-plus-circle me-2"></i>New Analysis
+      </a>
+      <a href="{% url 'screener:history' %}" class="btn btn-outline-light">
+        <i class="bi bi-clock-history me-2"></i>View History
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyText(elementId) {
+  const text = document.getElementById(elementId).innerText;
+  navigator.clipboard.writeText(text).then(function() {
+    // Brief visual feedback
+    const btn = event.currentTarget;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-check2 me-1"></i>Copied!';
+    btn.classList.replace('btn-outline-light', 'btn-success');
+    setTimeout(function() {
+      btn.innerHTML = originalHTML;
+      btn.classList.replace('btn-success', 'btn-outline-light');
+    }, 1500);
+  });
+}
+</script>
+{% endblock %}
