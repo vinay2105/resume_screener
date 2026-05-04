@@ -3,4 +3,4 @@ google-generativeai>=0.8.0
 pdfplumber>=0.11.0
 python-dotenv>=1.0.0
 gunicorn
-dj-database-url
+whitenoise
